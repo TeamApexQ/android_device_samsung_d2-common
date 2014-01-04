@@ -22,23 +22,33 @@ $(call inherit-product-if-exists, vendor/samsung/d2-common/d2-common-vendor.mk)
 ## overlays
 DEVICE_PACKAGE_OVERLAYS += device/samsung/d2-common/overlay
 
+# Boot animation and screen size
+
+ifeq ($(filter apexqtmo expressatt,$(VARIENT_MODEL)),)
 # Device uses high-density artwork where available
 PRODUCT_AAPT_CONFIG := normal hdpi xhdpi
 PRODUCT_AAPT_PREF_CONFIG := xhdpi
-
-# Boot animation
-
-ifneq ($(VARIENT_MODEL),apexqtmo)
-## apexq merge colusion
 TARGET_SCREEN_HEIGHT := 1280
 TARGET_SCREEN_WIDTH := 720
 PRODUCT_PROPERTY_OVERRIDES += ro.sf.lcd_density=320
+else
+# These poor devices have smaller screens
+PRODUCT_AAPT_CONFIG := normal hdpi
+PRODUCT_AAPT_PREF_CONFIG := hdpi
+TARGET_SCREEN_HEIGHT := 800
+TARGET_SCREEN_WIDTH := 480
+PRODUCT_PROPERTY_OVERRIDES += ro.sf.lcd_density=240
 endif
+
 # Audio configuration
 PRODUCT_COPY_FILES += \
         device/samsung/d2-common/audio/snd_soc_msm_2x:system/etc/snd_soc_msm/snd_soc_msm_2x \
-        device/samsung/d2-common/audio/audio_policy.conf:system/etc/audio_policy.conf \
-        device/samsung/d2-common/audio/audio_effects.conf:system/etc/audio_effects.conf
+        device/samsung/d2-common/audio/audio_policy.conf:system/etc/audio_policy.conf
+
+# Wifi
+PRODUCT_COPY_FILES += \
+        device/samsung/d2-common/wpa_supplicant_overlay.conf:system/etc/wifi/wpa_supplicant_overlay.conf \
+        device/samsung/d2-common/p2p_supplicant_overlay.conf:system/etc/wifi/p2p_supplicant_overlay.conf
 
 # Keymaps
 PRODUCT_COPY_FILES += \
@@ -74,10 +84,6 @@ PRODUCT_COPY_FILES += \
 # Torch
 PRODUCT_PACKAGES += Torch
 
-# Vold configuration
-PRODUCT_COPY_FILES += \
-    device/samsung/d2-common/vold.fstab:system/etc/vold.fstab
-
 # Wifi
 PRODUCT_PACKAGES += \
     libnetcmdiface \
@@ -103,20 +109,17 @@ PRODUCT_PACKAGES += qrngd
 
 #common build.props
 PRODUCT_PROPERTY_OVERRIDES += \
+    wifi.interface=wlan0 \
     ro.ril.hsxpa=1 \
     ro.ril.gprsclass=10 \
     persist.radio.add_power_save=1 \
     persist.radio.snapshot_disabled=1 \
     com.qc.hardware=true \
     persist.radio.apm_sim_not_pwdn=1 \
-    ro.telephony.call_ring.multiple=0 \
     ro.ril.transmitpower=true \
     ro.opengles.version=131072 \
-    persist.audio.fluence.mode=endfire \
     persist.audio.vr.enable=false \
-    persist.audio.handset.mic=digital \
     persist.audio.speaker.location=high \
-    ro.qc.sdk.audio.fluencetype=fluence \
     persist.timed.enable=true \
     ro.emmc.sdcard.partition=17 \
     ro.use_data_netmgrd=true \
@@ -124,7 +127,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
     lpa.decode=true \
     rild.libpath=/system/lib/libril-qc-qmi-1.so \
     ril.subscription.types=NV,RUIM \
-    ro.config.svlte1x=true \
+    ro.ril.svdo=true \
     ro.cdma.subscribe_on_ruim_ready=true \
     persist.radio.no_wait_for_card=0 \
     keyguard.no_require_sim=true \
@@ -138,6 +141,18 @@ PRODUCT_PROPERTY_OVERRIDES += \
     persist.rild.nitz_short_ons_1="" \
     persist.rild.nitz_short_ons_2="" \
     persist.rild.nitz_short_ons_3=""
+
+ifneq ($(VARIENT_MODEL),apexqtmo)
+PRODUCT_PROPERTY_OVERRIDES += \
+    persist.audio.fluence.mode=endfire \
+    persist.audio.handset.mic=digital \
+    ro.qc.sdk.audio.fluencetype=fluence
+endif
+
+# enable repeatable keys in cwm
+PRODUCT_PROPERTY_OVERRIDES += \
+    ro.cwm.enable_key_repeat=true \
+    ro.cwm.repeatable_keys=114,115
 
 # NFC Support
 PRODUCT_PACKAGES += \
@@ -156,8 +171,16 @@ endif
 PRODUCT_COPY_FILES += \
     $(NFCEE_ACCESS_PATH):system/etc/nfcee_access.xml
 
+# btconfig
+#PRODUCT_PACKAGES += btconfig
+
 # common msm8960
 $(call inherit-product, device/samsung/msm8960-common/msm8960.mk)
 
-$(call inherit-product, frameworks/native/build/phone-xhdpi-2048-dalvik-heap.mk)
+ifeq ($(filter apexqtmo expressatt,$(VARIENT_MODEL)),)
+    $(call inherit-product, frameworks/native/build/phone-xhdpi-2048-dalvik-heap.mk)
+else
+    $(call inherit-product, frameworks/native/build/phone-xhdpi-1024-dalvik-heap.mk)
+endif
+
 

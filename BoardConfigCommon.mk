@@ -32,11 +32,12 @@ BOARD_KERNEL_BASE           := 0x80200000
 BOARD_MKBOOTIMG_ARGS := --ramdisk_offset 0x01300000
 BOARD_KERNEL_PAGESIZE       := 2048
 TARGET_KERNEL_VARIANT_CONFIG := cyanogen_d2_defconfig
-ifeq ($(HAVE_SELINUX),true)
 TARGET_KERNEL_SELINUX_CONFIG := m2selinux_defconfig
-endif
 
 TARGET_BOOTLOADER_BOARD_NAME := MSM8960
+
+# Adreno configuration
+BOARD_EGL_CFG := device/samsung/d2-common/configs/egl.cfg
 
 # Recovery
 BOARD_CUSTOM_RECOVERY_KEYMAPPING := ../../device/samsung/d2-common/recovery/recovery_keys.c
@@ -45,8 +46,8 @@ BOARD_USES_MMCUTILS := true
 BOARD_HAS_LARGE_FILESYSTEM := true
 BOARD_HAS_NO_MISC_PARTITION := true
 BOARD_HAS_NO_SELECT_BUTTON := true
+BOARD_RECOVERY_SWIPE := true
 TARGET_RECOVERY_FSTAB := device/samsung/d2-common/rootdir/etc/fstab.qcom
-RECOVERY_FSTAB_VERSION := 2
 
 TARGET_USERIMAGES_USE_EXT4 := true
 BOARD_BOOTIMAGE_PARTITION_SIZE := 0x00A00000
@@ -54,20 +55,13 @@ BOARD_RECOVERYIMAGE_PARTITION_SIZE := 0x00A00000
 BOARD_SYSTEMIMAGE_PARTITION_SIZE := 1572864000
 BOARD_USERDATAIMAGE_PARTITION_SIZE := 28651290624
 BOARD_FLASH_BLOCK_SIZE := 131072
-COMMON_GLOBAL_CFLAGS += -DQCOM_BSP_CAMERA_ABI_HACK
 
 # bluetooth
 BOARD_BLUETOOTH_BDROID_BUILDCFG_INCLUDE_DIR := device/samsung/d2-common/bluetooth
 BOARD_BLUEDROID_VENDOR_CONF := device/samsung/d2-common/bluetooth/vnd_d2.txt
-BOARD_BLUETOOTH_USES_HCIATTACH_PROPERTY := false
 
 # Disable initlogo, Samsungs framebuffer is weird
 TARGET_NO_INITLOGO := true
-
-# HAX
-#BOARD_USE_SAMSUNG_SEPARATEDSTREAM := true
-#BOARD_USES_LIBMEDIA_WITH_AUDIOPARAMETER := true
-#TARGET_PROVIDES_LIBAUDIO := true
 
 # Use Audience A2220 chip
 BOARD_HAVE_AUDIENCE_A2220 := true
@@ -75,7 +69,39 @@ BOARD_HAVE_AUDIENCE_A2220 := true
 # Use USB Dock Audio
 BOARD_HAVE_DOCK_USBAUDIO := true
 
-ifneq ($(VARIENT_MODEL),apexqtmo)
-# Use MM heap for Camera
-BOARD_CAMERA_USE_MM_HEAP := true
-endif
+#camera abi compatiblily
+TARGET_DISPLAY_INSECURE_MM_HEAP := true
+COMMON_GLOBAL_CFLAGS += -DQCOM_BSP_CAMERA_ABI_HACK
+
+# Don't build qcom camera HAL
+USE_DEVICE_SPECIFIC_CAMERA := true
+
+# Separate audio devices for VOIP
+BOARD_USES_SEPERATED_VOIP := true
+
+# SELinux
+BOARD_SEPOLICY_DIRS += \
+        device/samsung/d2-common/sepolicy
+
+BOARD_SEPOLICY_UNION += \
+        file_contexts \
+        app.te \
+        bluetooth.te \
+        device.te \
+        domain.te \
+        drmserver.te \
+        file.te \
+        hci_init.te \
+        healthd.te \
+        init.te \
+        init_shell.te \
+        keystore.te \
+        kickstart.te \
+        mediaserver.te \
+        nfc.te \
+        rild.te \
+        surfaceflinger.te \
+        system.te \
+        ueventd.te \
+        wpa.te \
+        wpa_socket.te
