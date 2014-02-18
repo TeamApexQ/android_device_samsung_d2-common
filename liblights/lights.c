@@ -36,6 +36,7 @@ char const*const BUTTON_FILE = "/sys/class/leds/button-backlight/brightness";
 
 char const*const LED_BLINK = "/sys/class/sec/led/led_blink";
 char const*const KEYBOARD_FILE = "/sys/class/leds/keyboard-backlight/brightness";
+char const*const LID_FILE = "/sys/class/sec/sec_qwerty_flip/sec_qwerty_flip_pressed";
 
 #ifdef USE_BLN
 char const*const BLN_FILE = "/sys/devices/virtual/sec/sec_touchkey/touchkey_bln_enable";
@@ -79,7 +80,6 @@ static int write_int(char const *path, int value)
     }
 }
 
-/* Currently unused.
 static int read_int(char const *path)
 {
     int fd;
@@ -94,7 +94,6 @@ static int read_int(char const *path)
 
     return atoi(buffer);
 }
-*/
 
 static int write_str(char const *path, const char* value)
 {
@@ -162,9 +161,12 @@ set_light_buttons(struct light_device_t* dev,
 {
     int err = 0;
     int on = is_lit(state);
+    int lid = 0;
 
     pthread_mutex_lock(&g_lock);
     err = write_int(BUTTON_FILE, on?255:0);
+    lid = read_int(LID_FILE);
+    write_int(KEYBOARD_FILE, on?(lid?255:0):0);
     pthread_mutex_unlock(&g_lock);
 
     return err;
