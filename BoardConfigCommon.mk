@@ -87,3 +87,12 @@ USE_DEVICE_SPECIFIC_CAMERA := true
 
 # Separate audio devices for VOIP
 BOARD_USES_SEPERATED_VOIP := true
+
+# TWRP
+RECOVERY_SDCARD_ON_DATA := true
+TW_INTERNAL_STORAGE_PATH := "/data/media"
+TW_INTERNAL_STORAGE_MOUNT_POINT := "data"
+TW_EXTERNAL_STORAGE_PATH := "/external_sd"
+TW_EXTERNAL_STORAGE_MOUNT_POINT := "external_sd"
+PRODUCT_COPY_FILES += \
+    device/samsung/d2-common/recovery/twrp.fstab:recovery/root/etc/twrp.fstab
