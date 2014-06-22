@@ -68,7 +68,6 @@ on early-boot
     setprop persist.sys.ssr.restart_level 3
     write /sys/module/subsystem_restart/parameters/enable_ramdumps 0
     setprop qcom.audio.init complete
-    setprop qcom.thermal thermal-engine
     exec /system/bin/sh /init.qcom.early_boot.sh ${ro.board.platform}
     exec /system/bin/sh /init.qcom.syspart_fixup.sh ${ro.board.platform} ${ro.serialno}
 
