@@ -34,6 +34,7 @@ PRODUCT_PROPERTY_OVERRIDES += ro.sf.lcd_density=240
 # Audio configuration
 PRODUCT_COPY_FILES += \
         device/samsung/d2-common/audio/snd_soc_msm_2x:system/etc/snd_soc_msm/snd_soc_msm_2x \
+	device/samsung/d2-common/audio/mixer_paths.xml:system/etc/mixer_paths.xml \
         device/samsung/d2-common/audio/audio_policy.conf:system/etc/audio_policy.conf
 
 # Wifi
